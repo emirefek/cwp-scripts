@@ -15,7 +15,6 @@ Updater for PhpMyAdmin to latest recommendated stable version by PhpMyAdmin Team
 
     ### HOW TO USE PMAupdater.sh ###
     
-    cd /tmp/
     wget --no-cache  https://raw.githubusercontent.com/emirefek/cwp-scripts/master/PMAupdater.sh
     chmod 755 PMAupdater.sh
     sh PMAupdater.sh
