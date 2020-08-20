@@ -1,13 +1,14 @@
 #!/bin/bash
 
 #if [[ `cat /etc/fstab | grep -E "tmp.*noexec"` != "" ]]; then mount -o remount,exec /tmp >/dev/null 2>&1 ; fi
+cd /usr/local/src
+rm -rf /usr/local/src/apache*
 
 arch=$(uname -m)
 pubip=`curl -s http://centos-webpanel.com/webpanel/main.php?app=showip`
 # CONFIGURE MIRRORS HERE
-version=2.4.43
+version=2.4.46
 opensslver=1.1.1g
-openssl_minversion=1.1.1
 apachesource="https://downloads.apache.org//httpd/httpd-$version.tar.gz"
 
 # Dependency installer
@@ -26,12 +27,12 @@ else
   echo "We need to update you OpenSSL for better TLS."
   echo "============================================="
   cd /usr/local/src
-	rm -rf openssl-*
-	wget https://www.openssl.org/source/openssl-$opensslver.tar.gz
-	tar zxvf openssl-$opensslver.tar.gz
-	cd openssl-*
-	./config --prefix=/usr --openssldir=/usr/lib64 shared
-	make && make install
+        rm -rf openssl-*
+        wget https://www.openssl.org/source/openssl-$opensslver.tar.gz
+        tar zxvf openssl-$opensslver.tar.gz
+        cd openssl-*
+        ./config --prefix=/usr --openssldir=/usr/lib64 shared
+        make && make install
 fi
 
 cd /usr/local/src/apache-build
@@ -55,9 +56,9 @@ fi
 make clean
 
 if [ -e "/usr/bin/nproc" ];then
-	make -j `/usr/bin/nproc`
+        make -j `/usr/bin/nproc`
 else
-	make
+        make
 fi
 make install
 
@@ -172,7 +173,7 @@ LoadModule brotli_module modules/mod_brotli.so
 <IfModule mod_brotli.c>
 BrotliCompressionQuality 6
 
-# To enable globally 
+# To enable globally
 AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript application/x-javascript application/javascript application/json application/x-font-ttf application/vnd.ms-fontobject image/x-icon
 
 BrotliFilterNote Input brotli_input_info
@@ -197,7 +198,7 @@ echo
 
 # Add alert info into cwp
 #sh /scripts/add_alert alert-info "Apache Re-Build task completed, please check the log for more details." /var/log/apache-rebuild.log
-/usr/local/cwp/php71/bin/php /usr/local/cwpsrv/htdocs/resources/admin/include/libs/notifications/cli.php --level="info" --subject="Apache Re-Build INFO" --message="Apache Re-Build task completed, please check the log for more details. Click <a title='Apache Re-Build task LOG' href='index.php?module=file_editor&file=/var/log/apache-rebuild.log'>here</a> to check it."
+/usr/local/cwp/php71/bin/php /usr/local/cwpsrv/htdocs/resources/admin/include/libs/notifications/cli.php --level="info" --subject="Apache Re-Build INFO" --message="Apache Re-Build(upgrade) task completed, please check the log for more details. Click <a title='Apache Re-Build task LOG' href='index.php?module=file_editor&file=/var/log/apache-rebuild.log'>here</a> to check it."
 
 test -h /usr/local/src/apache-build || rm -Rf /usr/local/src/apache-build
 rm -rf /usr/local/src/apache-rebuild.sh
