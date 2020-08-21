@@ -10,6 +10,8 @@ pubip=`curl -s http://centos-webpanel.com/webpanel/main.php?app=showip`
 version=2.4.46
 opensslver=1.1.1g
 apachesource="https://downloads.apache.org//httpd/httpd-$version.tar.gz"
+hostname=`cat /etc/hostname`
+
 
 # Dependency installer
 yum -y install apr-util-devel apr-devel apr apr-util
@@ -24,7 +26,7 @@ if echo -e "$(openssl version|awk '{print $2}')\n${openssl_minversion}" | sort -
   echo "============================================="
 else
   echo "============================================="
-  echo "We need to update you OpenSSL for better TLS."
+  echo "We need to update your OpenSSL for better TLS"
   echo "============================================="
   cd /usr/local/src
         rm -rf openssl-*
@@ -132,10 +134,11 @@ EOF
 fi
 
 cat > /usr/local/apache/conf.d/system-redirects.conf <<EOF
-Redirect permanent /phpmyadmin https://$pubip:2031/pma
-Redirect permanent /phpMyAdmin https://$pubip:2031/pma
-Redirect permanent /cwp https://$pubip:2083/
-Redirect permanent /cwpadmin https://$pubip:2031/
+Redirect permanent /phpmyadmin https://$hostname:2031/pma
+Redirect permanent /phpMyAdmin https://$hostname:2031/pma
+Redirect permanent /cwp https://$hostname:2083/
+Redirect permanent /cwpadmin https://$hostname:2031/
+Redirect permanent /webmail https://$hostname:2031/
 EOF
 
 if [[ ! -z "`grep ':8181' /usr/local/apache/conf.d/vhosts/*.conf 2> /dev/null`" ]]; then
@@ -172,10 +175,8 @@ cat > /usr/local/apache/conf.d/brotli.conf <<EOF
 LoadModule brotli_module modules/mod_brotli.so
 <IfModule mod_brotli.c>
 BrotliCompressionQuality 6
-
 # To enable globally
 AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css text/javascript application/x-javascript application/javascript application/json application/x-font-ttf application/vnd.ms-fontobject image/x-icon
-
 BrotliFilterNote Input brotli_input_info
 BrotliFilterNote Output brotli_output_info
 BrotliFilterNote Ratio brotli_ratio_info
@@ -187,6 +188,72 @@ SetEnvIfNoCase Request_URI \
 #Make sure proxies don't deliver the wrong content
 Header append Vary User-Agent env=!dont-vary
 </IfModule>
+EOF
+
+# GZip Compression Enabler #
+touch /usr/local/apache/conf.d/gzip.conf
+cat > /usr/local/apache/conf.d/gzip.conf <<EOF
+LoadModule deflate_module modules/mod_deflate.so
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE application/javascript 
+AddOutputFilterByType DEFLATE application/rss+xml 
+AddOutputFilterByType DEFLATE application/vnd.ms-fontobject 
+AddOutputFilterByType DEFLATE application/x-font 
+AddOutputFilterByType DEFLATE application/x-font-opentype 
+AddOutputFilterByType DEFLATE application/x-font-otf 
+AddOutputFilterByType DEFLATE application/x-font-truetype 
+AddOutputFilterByType DEFLATE application/x-font-ttf 
+AddOutputFilterByType DEFLATE application/x-javascript 
+AddOutputFilterByType DEFLATE application/xhtml+xml 
+AddOutputFilterByType DEFLATE application/xml 
+AddOutputFilterByType DEFLATE font/opentype 
+AddOutputFilterByType DEFLATE font/otf 
+AddOutputFilterByType DEFLATE font/ttf 
+AddOutputFilterByType DEFLATE image/svg+xml 
+AddOutputFilterByType DEFLATE image/x-icon 
+AddOutputFilterByType DEFLATE text/css 
+AddOutputFilterByType DEFLATE text/html 
+AddOutputFilterByType DEFLATE text/javascript 
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/xml 
+DeflateCompressionLevel 6
+	<IfModule mod_setenvif.c>
+		BrowserMatch ^Mozilla/4 gzip-only-text/html
+		BrowserMatch ^Mozilla/4.0[678] no-gzip
+		BrowserMatch bMSIE !no-gzip !gzip-only-text/html
+	</IfModule>
+Header append Vary User-Agent 
+</IfModule>
+EOF
+
+# SSL TLS1.2-1.3 Forcer #
+touch /usr/local/apache/conf.d/ssl.conf
+cat > /usr/local/apache/conf.d/ssl.conf <<EOF
+<IfModule !ssl_module>
+LoadModule ssl_module modules/mod_ssl.so
+</IfModule>
+Listen 443
+SSLProtocol -all +TLSv1.3 +TLSv1.2
+SSLCipherSuite "ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256"
+#SSLOpenSSLConfCmd Curves X25519:secp521r1:secp384r1:prime256v1
+SSLHonorCipherOrder On
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+Header always set X-Frame-Options SAMEORIGIN
+Header always set X-Content-Type-Options nosniff
+SSLCompression off
+SSLSessionTickets Off
+EOF
+
+# SSL TLS1.2-1.3 Forcer #
+touch /usr/local/apache/conf.d/apacheopt.conf
+cat > /usr/local/apache/conf.d/apacheopt.conf <<EOF
+ServerTokens Prod
+ServerSignature Off
+KeepAlive On
+MaxKeepAliveRequests 500
+KeepAliveTimeout 5
+Header always append X-Frame-Options SAMEORIGIN
+HostnameLookups Off
 EOF
 
 
