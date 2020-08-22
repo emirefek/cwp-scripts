@@ -10,6 +10,15 @@ Updater Apache to latest + updater to OpenSSL + enabler brotli + TLSv1.3 enabler
     chmod 755 apache-updater.sh
     sh apache-updater.sh
 
+***mariadb-updater.sh***
+Updater for MariaDB to latest recommendated stable version by MariaDB Team rather than CWP Team, CWP team is just ignores security updates and with this script you can update MariaDB to latest. Script will automaticly back up current databases. 
+
+    ### HOW TO USE mariadb-updater.sh ###
+    
+    wget --no-cache  https://raw.githubusercontent.com/emirefek/cwp-scripts/master/mariadb-updater.sh
+    chmod 755 mariadb-updater.sh
+    sh mariadb-updater.sh
+
 ***pma-updater.sh***
 Updater for PhpMyAdmin to latest recommendated stable version by PhpMyAdmin Team rather than CWP Team, CWP team is just ignores security updates and with this script you can update PhpMyAdmin to latest [Thanks to [CWP Team](http://centos-webpanel.com/) for  base script, I just did some mods in it.]
 
