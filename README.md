@@ -13,7 +13,7 @@ Updater Apache to latest + updater to OpenSSL + enabler brotli + TLSv1.3 enabler
 ***pma-updater.sh***
 Updater for PhpMyAdmin to latest recommendated stable version by PhpMyAdmin Team rather than CWP Team, CWP team is just ignores security updates and with this script you can update PhpMyAdmin to latest [Thanks to [CWP Team](http://centos-webpanel.com/) for  base script, I just did some mods in it.]
 
-    ### HOW TO USE PMAupdater.sh ###
+    ### HOW TO USE pma-updater.sh ###
     
     wget --no-cache  https://raw.githubusercontent.com/emirefek/cwp-scripts/master/pma-updater.sh
     chmod 755 pma-updater.sh
