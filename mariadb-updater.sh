@@ -7,7 +7,7 @@ arch=$(uname -m)
 pubip=`curl -s http://centos-webpanel.com/webpanel/main.php?app=showip`
 hostname=`cat /etc/hostname`
 mariadb_current=`/usr/bin/mysql -V | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+'`
-mariadb_latest=10.5.5
+mariadb_latest=10.5.9
 mariadb_repo=http://yum.mariadb.org/10.5/centos7-amd64/
 
 pma_current=`cat /usr/local/cwpsrv/var/services/pma/README | grep Version | cut -d " " -f 2`
